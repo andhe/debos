@@ -51,6 +51,7 @@ configuration (below) and label the filesystem located on this partition.
 - fs -- filesystem type used for formatting.
 
 'none' fs type should be used for partition without filesystem.
+'swap' fs type should be used to create a swap partition.
 
 - start -- offset from beginning of the disk there the partition starts.
 
@@ -222,6 +223,8 @@ func (i ImagePartitionAction) formatPartition(p *Partition, context debos.DebosC
 	case "btrfs":
 		// Force formatting to prevent failure in case if partition was formatted already
 		cmdline = append(cmdline, "mkfs.btrfs", "-L", p.Name, "-f")
+	case "swap":
+		cmdline = append(cmdline, "mkwap", "-L", p.Name)
 	case "none":
 	default:
 		cmdline = append(cmdline, fmt.Sprintf("mkfs.%s", p.FS), "-L", p.Name)
@@ -295,6 +298,8 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 		switch p.FS {
 		case "vfat":
 			command = append(command, "fat32")
+		case "swap":
+			command = append(command, "linux-swap")
 		case "none":
 		default:
 			command = append(command, p.FS)
